@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>abc.club - VIP HIEU SYSTEM</title>
+    <style>
+        :root { --gold: #ffcf4b; --dark: #020617; }
+        body {
+            margin: 0; font-family: -apple-system, sans-serif;
+            background: radial-gradient(circle, #1e293b, #020617);
+            color: white; height: 100vh; display: flex; justify-content: center; align-items: center;
+            overflow: hidden; touch-action: none;
+        }
+        .container {
+            width: 350px; background: rgba(15, 23, 42, 0.95);
+            border: 2px solid var(--gold); border-radius: 30px;
+            padding: 20px; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,1); display: none;
+        }
+        .brand { font-size: 28px; font-weight: 900; color: var(--gold); text-shadow: 0 0 10px gold; margin-bottom: 10px; }
+        .dice-area {
+            position: relative; width: 210px; height: 210px;
+            margin: 0 auto 15px; background: #0f172a;
+            border-radius: 50%; border: 8px solid #334155;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: inset 0 0 40px #000;
+        }
+        .dice {
+            font-size: 45px; margin: 3px; background: white; color: black;
+            border-radius: 10px; width: 50px; height: 50px;
+            line-height: 50px; text-align: center; font-weight: bold;
+            box-shadow: inset -2px -2px 4px #ccc, 2px 2px 8px rgba(0,0,0,0.5);
+            z-index: 5;
+        }
+        #bowl {
+            position: absolute; width: 102%; height: 102%;
+            background: radial-gradient(circle, #475569, #1e293b);
+            border-radius: 50%; z-index: 20; cursor: grab;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+            display: none; touch-action: none;
+        }
+        .bet-input {
+            width: 80%; padding: 12px; border-radius: 10px;
+            border: 2px solid #334155; background: #000;
+            color: var(--gold); font-size: 22px; text-align: center; margin-bottom: 15px;
+        }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn { padding: 15px; border-radius: 15px; border: none; font-size: 20px; font-weight: bold; color: white; transition: 0.2s; }
+        .tai { background: linear-gradient(#22c55e, #166534); }
+        .xiu { background: linear-gradient(#ef4444, #991b1b); }
+        #gift-modal {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #1e293b; border: 2px solid var(--gold); padding: 25px;
+            border-radius: 20px; z-index: 100; display: none; width: 280px;
+            box-shadow: 0 0 100px #000;
+        }
+        .btn:active { transform: scale(0.95); opacity: 0.8; }
+    </style>
+</head>
+<body>
+
+<div id="auth-screen" style="text-align: center;">
+    <div class="brand">abc.club</div>
+    <input type="text" id="key-input" placeholder="Nhập Key vào game..." style="padding:15px; border-radius:10px; border:none; text-align:center; width:220px; font-size:18px;"><br>
+    <a href="https://t.me/abc_631" style="color:var(--gold); font-size:13px; text-decoration:none; display:block; margin: 15px 0;">Hỗ trợ: @abc_631</a>
+    <button onclick="checkKey()" style="padding:15px 60px; background:var(--gold); border:none; border-radius:10px; font-weight:bold; cursor:pointer;">VÀO GAME</button>
+</div>
+
+<div class="container" id="game-container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <span style="background:#334155; padding:5px 12px; border-radius:20px; font-size:11px;">🆔 <b id="user-id">---</b></span>
+        <button onclick="openGiftModal()" style="background:var(--gold); border:none; padding:6px 15px; border-radius:20px; font-weight:bold; font-size:12px; cursor:pointer;">+ NẠP XU</button>
+    </div>
+    <div class="brand">abc.club</div>
+    <div style="margin-bottom: 15px;">💰 <b id="balance-val" style="font-size: 28px; color: var(--gold);">0</b></div>
+    <div class="dice-area"><div id="bowl"></div><div id="dice-wrap" style="display:flex;"><div class="dice" id="d1">?</div><div class="dice" id="d2">?</div><div class="dice" id="d3">?</div></div></div>
+    <input type="number" id="bet-amt" class="bet-input" value="1000">
+    <div class="btn-group"><button class="btn tai" id="btn-tai" onclick="play('tai')">TÀI</button><button class="btn xiu" id="btn-xiu" onclick="play('xiu')">XỈU</button></div>
+    <p style="font-size: 10px; color: #475569; margin-top: 15px;">ADMIN PHUNG HIEU</p>
+</div>
+
+<div id="gift-modal">
+    <h3 style="color:var(--gold); margin:0; font-size: 20px;">NẠP GIFTCODE</h3>
+    <input type="text" id="gift-input" placeholder="Dán mã nạp tiền..." style="width:90%; padding:12px; margin:15px 0; border-radius:8px; border:none; text-align:center; background:#0f172a; color:white; border: 1px solid var(--gold);">
+    <button onclick="redeemGift()" style="width:100%; padding:12px; background:var(--gold); border:none; border-radius:10px; font-weight:bold; cursor:pointer;">XÁC NHẬN</button>
+    <button onclick="document.getElementById('gift-modal').style.display='none'" style="width:100%; padding:10px; background:transparent; border:none; color:#94a3b8; margin-top:10px; cursor:pointer;">Đóng</button>
+</div>
+
+<script>
+    let balance = 0, isSqueezing = false, startX = 0, startY = 0, currentChoice = "", currentBet = 0;
+    
+    // ==========================================
+    // 1. CHỖ HIẾU ĐỔI KEY VÀ MẬT MÃ Ở ĐÂY
+    // ==========================================
+    const VALID_KEYS = ["hieu55", "hieu123", "abc888"]; // Đổi/thêm Key vào game
+    const MY_SECRET = "hieu99"; // Đổi Mật mã bí mật của Hiếu
+    // ==========================================
+
+    function checkKey() {
+        const input = document.getElementById('key-input').value.trim();
+        if (VALID_KEYS.includes(input)) {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            initUser();
+        }
+    }
+
+    function initUser() {
+        let id = localStorage.getItem('hieu_id') || ("USER-" + Math.floor(Math.random() * 90000 + 10000));
+        localStorage.setItem('hieu_id', id);
+        document.getElementById('user-id').innerText = id;
+        balance = parseInt(localStorage.getItem('hieu_bal')) || 0;
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('balance-val').innerText = balance.toLocaleString();
+        localStorage.setItem('hieu_bal', balance);
+    }
+
+    function openGiftModal() { document.getElementById('gift-modal').style.display = 'block'; }
+
+    // HỆ THỐNG DUYỆT GIFTCODE SIÊU ẢO
+    function redeemGift() {
+        const code = document.getElementById('gift-input').value.trim();
+        const myID = localStorage.getItem('hieu_id').replace('USER-', ''); 
+        const usedCodes = JSON.parse(localStorage.getItem('hieu_used_codes') || "[]");
+
+        if (usedCodes.includes(code)) return;
+
+        // KIỂM TRA: Trong mã phải có ID của khách VÀ mật mã bí mật của Hiếu
+        if (code.includes(myID) && code.includes(MY_SECRET)) {
+            let parts = code.split('_');
+            let amount = parseInt(parts[1]); // Lấy số tiền ở giữa
+
+            if (!isNaN(amount) && amount > 0) {
+                balance += amount;
+                usedCodes.push(code); // Đánh dấu mã này đã dùng trên máy này
+                localStorage.setItem('hieu_used_codes', JSON.stringify(usedCodes));
+                updateDisplay();
+                document.getElementById('gift-modal').style.display = 'none';
+                document.getElementById('gift-input').value = "";
+            }
+        }
+    }
+
+    function play(choice) {
+        let amt = parseInt(document.getElementById('bet-amt').value);
+        if(amt < 100 || amt > balance) return;
+        balance -= amt; currentBet = amt; currentChoice = choice; updateDisplay();
+        document.getElementById('btn-tai').disabled = true; document.getElementById('btn-xiu').disabled = true;
+        setTimeout(() => {
+            let d = [Math.floor(Math.random()*6)+1, Math.floor(Math.random()*6)+1, Math.floor(Math.random()*6)+1];
+            let sum = d[0] + d[1] + d[2];
+            let icons = ["⚀","⚁","⚂","⚃","⚄","⚅"];
+            document.getElementById('d1').innerText = icons[d[0]-1];
+            document.getElementById('d2').innerText = icons[d[1]-1];
+            document.getElementById('d3').innerText = icons[d[2]-1];
+            window.gameRes = (sum >= 11) ? "tai" : "xiu";
+            document.getElementById('bowl').style.display = 'block';
+            document.getElementById('bowl').style.transform = 'translate(0, 0)';
+        }, 600);
+    }
+
+    const bowl = document.getElementById('bowl');
+    bowl.addEventListener('touchstart', (e) => { isSqueezing = true; startX = e.touches[0].clientX; startY = e.touches[0].clientY; });
+    bowl.addEventListener('touchmove', (e) => {
+        if(!isSqueezing) return;
+        let moveX = e.touches[0].clientX - startX, moveY = e.touches[0].clientY - startY;
+        bowl.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${moveX/15}deg)`;
+        if(Math.sqrt(moveX*moveX + moveY*moveY) > 100) { 
+            isSqueezing = false; bowl.style.display = 'none'; 
+            if(currentChoice === window.gameRes) balance += currentBet * 2;
+            updateDisplay();
+            document.getElementById('btn-tai').disabled = false; document.getElementById('btn-xiu').disabled = false;
+        }
+    });
+</script>
+</body>
+</html>
